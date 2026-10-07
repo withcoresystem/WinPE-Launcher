@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PlatformTarget>x64</PlatformTarget>
+    <ProjectGuid>{8F4A6B2E-3C71-4D5A-9B18-2E5F0A7C6D41}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>WinPeLauncher</RootNamespace>
+    <AssemblyName>Launcher</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <LangVersion>7.3</LangVersion>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkRootPath Condition="Exists('$(MSBuildProjectDirectory)\ref\.NETFramework\v4.5\mscorlib.dll')">$(MSBuildProjectDirectory)\ref\</TargetFrameworkRootPath>
+    <AllowedReferenceRelatedFileExtensions>.pdb</AllowedReferenceRelatedFileExtensions>
+    <ApplicationManifest>src\app.manifest</ApplicationManifest>
+    <ApplicationIcon>src\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AntdUI">
+      <HintPath>lib\AntdUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\MainForm.cs" />
+    <Compile Include="src\Program.cs" />
+    <Compile Include="src\Theme.cs" />
+    <Compile Include="src\Services\Exec.cs" />
+    <Compile Include="src\Services\WifiService.cs" />
+    <Compile Include="src\Services\BitLockerService.cs" />
+    <Compile Include="src\Services\TimeSyncService.cs" />
+    <Compile Include="src\Services\AppConfig.cs" />
+    <Compile Include="src\Services\AppScanner.cs" />
+    <Compile Include="src\Services\UiFonts.cs" />
+    <Compile Include="src\Services\ChatEngine.cs" />
+    <Compile Include="src\Services\MarkdownRtf.cs" />
+    <Compile Include="src\Services\SystemDiagnostics.cs" />
+    <Compile Include="src\Services\ScreenCapture.cs" />
+    <Compile Include="src\Dialogs\DialogUi.cs" />
+    <Compile Include="src\Dialogs\WifiDialog.cs" />
+    <Compile Include="src\Dialogs\BitLockerDialog.cs" />
+    <Compile Include="src\Dialogs\ChatBubble.cs" />
+    <Compile Include="src\Dialogs\ChatTranscript.cs" />
+    <Compile Include="src\Dialogs\ChatDialog.cs" />
+    <Compile Include="src\Dialogs\DialogDock.cs" />
+    <Compile Include="src\Dialogs\DialogBorder.cs" />
+    <Compile Include="src\Dialogs\ScrollHost.cs" />
+    <Compile Include="src\Dialogs\SystemDiagnosticDialog.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="lib\AntdUI.dll">
+      <LogicalName>AntdUI.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Fonts\Inter-Regular.ttf">
+      <LogicalName>Fonts.Inter-Regular.ttf</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Fonts\Inter-Bold.ttf">
+      <LogicalName>Fonts.Inter-Bold.ttf</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Fonts\Hack-Regular.ttf">
+      <LogicalName>Fonts.Hack-Regular.ttf</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Resources\assistant.svg">
+      <LogicalName>assistant.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Resources\diagnostic.svg">
+      <LogicalName>diagnostic.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Resources\network.svg">
+      <LogicalName>network.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Resources\screenshot.svg">
+      <LogicalName>screenshot.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Engine\chat-engine.ps1">
+      <LogicalName>chat-engine.ps1</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\Engine\diag-engine.ps1">
+      <LogicalName>diag-engine.ps1</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="apps-config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

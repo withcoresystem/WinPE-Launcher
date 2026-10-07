@@ -1,0 +1,21 @@
+{
+  // Whitebox title on the left side of the bar. Max 15 characters ("..." if longer).
+  "whitebox": "CORESYSTEM VN",
+  "timezone": "SE Asia Standard Time",
+
+  // Smart Assistant: OpenCode Go endpoint (OpenAI-compatible).
+  "assistant": {
+    "endpoint": "https://opencode.ai/zen/go/v1",
+    "apiKey": "",
+    "apiSecret": "",
+    "model": "",
+    "headers": { "x-opencode-session": "" }
+  },
+
+  "apps": [
+    { "name": "Explorer++", "path": "EXPLORER++\\EXPLORER++.EXE" },
+    { "name": "HwINFO64", "path": "HWINFO\\HWINFO64.EXE" },
+    { "name": "Multidrive", "path": "MULTIDRIVE\\MULTIDRIVE.EXE" },
+    { "name": "Palemoon", "path": "PALEMOON\\PALEMOON.EXE" }
+  ]
+}
