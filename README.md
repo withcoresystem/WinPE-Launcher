@@ -1,6 +1,6 @@
 # WinPE Launcher
 
-![WinPE Launcher](ref/screenshot.webp)
+![WinPE Launcher](/ref/screenshot.webp)
 
 A lightweight, native **taskbar-style launcher** for **Windows PE (WinPE) amd64** and
 **Windows x64**. It opens applications and scripts, exposes system tools (Wi-Fi,
