@@ -72,6 +72,7 @@ namespace WinPeLauncher
         private int _ticks;
         private bool _displayHooked;
         private bool _netUp;
+        private bool _startupLaunched;
         private readonly List<AppEntry> _appEntries = new List<AppEntry>();
 
         public MainForm()
@@ -267,6 +268,7 @@ namespace WinPeLauncher
                 Post(() =>
                 {
                     if (!IsDisposed) ApplyApps(merged);
+                    ScheduleStartup();
                 });
             });
 
@@ -657,33 +659,7 @@ namespace WinPeLauncher
             AppEntry app = _appEntries[index];
             try
             {
-                ProcessStartInfo psi = new ProcessStartInfo();
-                string dir = null;
-                if (!string.IsNullOrEmpty(app.Path) && Path.IsPathRooted(app.Path))
-                    dir = Path.GetDirectoryName(app.Path);
-                if (app.Script)
-                {
-                    string ext = Path.GetExtension(app.Path).ToLowerInvariant();
-                    if (ext == ".ps1")
-                    {
-                        psi.FileName = "powershell.exe";
-                        psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File \"" + app.Path + "\"";
-                    }
-                    else
-                    {
-                        psi.FileName = "cmd.exe";
-                        psi.Arguments = "/c \"" + app.Path + "\"";
-                    }
-                }
-                else
-                {
-                    psi.FileName = app.Path;
-                    if (!string.IsNullOrEmpty(app.Args)) psi.Arguments = app.Args;
-                }
-                psi.UseShellExecute = false;
-                if (!string.IsNullOrEmpty(app.Cwd) && Directory.Exists(app.Cwd)) psi.WorkingDirectory = app.Cwd;
-                else if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir)) psi.WorkingDirectory = dir;
-                Process.Start(psi);
+                StartAppEntry(app);
                 AntdUI.Message.success(this, "Started " + app.Name, DialogUi.Font, 3);
             }
             catch (Exception ex)
@@ -691,6 +667,134 @@ namespace WinPeLauncher
                 AntdUI.Message.error(this, app.Name + " failed: " + ex.Message, DialogUi.Font, 3);
             }
         }
+
+        private static ProcessStartInfo BuildStartInfo(AppEntry app)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo();
+            string dir = null;
+            if (!string.IsNullOrEmpty(app.Path) && Path.IsPathRooted(app.Path))
+                dir = Path.GetDirectoryName(app.Path);
+            if (app.Script)
+            {
+                string ext = Path.GetExtension(app.Path).ToLowerInvariant();
+                if (ext == ".ps1")
+                {
+                    psi.FileName = "powershell.exe";
+                    psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File \"" + app.Path + "\"";
+                }
+                else
+                {
+                    psi.FileName = "cmd.exe";
+                    psi.Arguments = "/c \"" + app.Path + "\"";
+                }
+            }
+            else
+            {
+                psi.FileName = app.Path;
+                if (!string.IsNullOrEmpty(app.Args)) psi.Arguments = app.Args;
+            }
+            psi.UseShellExecute = false;
+            if (!string.IsNullOrEmpty(app.Cwd) && Directory.Exists(app.Cwd)) psi.WorkingDirectory = app.Cwd;
+            else if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir)) psi.WorkingDirectory = dir;
+            return psi;
+        }
+
+        private static Process StartAppEntry(AppEntry app)
+        {
+            return Process.Start(BuildStartInfo(app));
+        }
+
+        #region startup
+
+        // Auto-runs apps flagged with "startup": true once, after the bar has painted.
+        private void ScheduleStartup()
+        {
+            if (_startupLaunched) return;
+            _startupLaunched = true;
+            bool any = false;
+            for (int i = 0; i < _appEntries.Count; i++)
+                if (_appEntries[i].Startup) { any = true; break; }
+            if (!any) return;
+
+            Timer once = new Timer();
+            once.Interval = 800;
+            once.Tick += (s, e) =>
+            {
+                once.Stop();
+                once.Dispose();
+                LaunchStartupApps();
+            };
+            once.Start();
+        }
+
+        private void LaunchStartupApps()
+        {
+            List<AppEntry> todo = new List<AppEntry>();
+            for (int i = 0; i < _appEntries.Count; i++)
+                if (_appEntries[i].Startup) todo.Add(_appEntries[i]);
+            if (todo.Count == 0) return;
+
+            AntdUI.ITask.Run(() =>
+            {
+                for (int i = 0; i < todo.Count; i++)
+                {
+                    AppEntry app = todo[i];
+                    try
+                    {
+                        Process p = StartAppEntry(app);
+                        if (p != null && !app.Script) CenterProcessWindow(p);
+                    }
+                    catch { }
+                    try { System.Threading.Thread.Sleep(300); } catch { }
+                }
+            });
+        }
+
+        // Waits for the launched process window, then centers it on its monitor's work area.
+        private static void CenterProcessWindow(Process p)
+        {
+            try
+            {
+                IntPtr hwnd = IntPtr.Zero;
+                for (int i = 0; i < 150; i++) // ~15s max
+                {
+                    try { p.Refresh(); } catch { }
+                    try { if (!p.HasExited) hwnd = p.MainWindowHandle; }
+                    catch { hwnd = IntPtr.Zero; }
+                    if (hwnd != IntPtr.Zero) break;
+                    System.Threading.Thread.Sleep(100);
+                }
+                if (hwnd == IntPtr.Zero) return;
+
+                RECT r;
+                if (!GetWindowRect(hwnd, out r)) return;
+                int w = r.Right - r.Left;
+                int h = r.Bottom - r.Top;
+                if (w <= 0 || h <= 0) return;
+
+                Screen sc = Screen.FromHandle(hwnd);
+                Rectangle wa = sc.WorkingArea;
+                int x = wa.Left + Math.Max(0, (wa.Width - w) / 2);
+                int y = wa.Top + Math.Max(0, (wa.Height - h) / 2);
+                SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            catch { }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT { public int Left, Top, Right, Bottom; }
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_NOACTIVATE = 0x0010;
+
+        #endregion
 
         private void RunWifi()
         {

@@ -32,9 +32,10 @@ OpenAI-compatible LLM — all from a single ~4 MB executable.
 | **Opened Windows** | Lists running windows (excluding the shell itself); click to activate |
 | **Smart Assistant** | Chat modal against any OpenAI-compatible LLM: Markdown rendering, selectable/copyable text, JSONL session history, ≤ 500-word replies, UTF-8 mojibake repair, clear errors when the endpoint/key is missing |
 | **System Diagnostic** | Read-only overview via `Get-CimInstance`: System, CPU, RAM modules, storage health, volumes with BitLocker status, graphics, network, battery, and problem devices |
-| **Screenshot** | One-click (or **PrintScreen**) full-screen capture, saved to `USB:\Screenshots\IMG-<timestamp>.jpg` |
+| **Screenshot** | One-click (or **PrintScreen**) full-screen capture **including the mouse cursor**, saved to `USB:\Screenshots\IMG-<timestamp>.jpg` |
 | **Bar** | Whitebox title (≤ 15 chars), network status icon (Connected / Disconnected), two-line clock in a configurable timezone, chat / diagnostic / screenshot icons, adjustable UI scale |
-| **Dialogs** | Wi-Fi, BitLocker, and toast notifications (themed, with an accent border) |
+| **Startup apps** | Apps flagged `"startup": true` auto-run once after the bar loads; their windows are centered on screen |
+| **Dialogs** | Wi-Fi, BitLocker, and toast notifications (themed, docked to the bottom-right, position-locked, with an accent border) |
 
 ---
 
@@ -60,7 +61,7 @@ OpenAI-compatible LLM — all from a single ~4 MB executable.
 ├── LICENSE                     MIT license
 ├── README.md                   this file (English)
 ├── README-VI.md                Vietnamese README
-├── NOTES.md                    development log / technical notes
+├── NOTICE                      proprietary components (not covered by MIT)
 ├── THIRD-PARTY-NOTICES.md      Inter (OFL-1.1), Hack (MIT), AntdUI (Apache-2.0)
 ├── Launcher.csproj             project file (win-x64, .NET Framework 4.5, C# 7.3)
 ├── build.cmd                   MSBuild wrapper
@@ -99,7 +100,7 @@ Deploy by copying **`Launcher.exe` + `apps-config.json`** to any folder
 | `timezone` | Timezone applied at startup (e.g. `SE Asia Standard Time`) |
 | `uiScale` | UI scale for the launcher and its dialogs (1 = 100%). FullHD is usually best at `1` or `1.25`; 2K/4K may need `1.5` or `2`. Leave empty to default to `1`. |
 | `assistant` | LLM connection settings (BYOK) — see below |
-| `apps[]` | Applications list: `name`, `path`, and optional `args`, `cwd`, `icon` |
+| `apps[]` | Applications list: `name`, `path`, and optional `args`, `cwd`, `icon`, `startup` |
 
 ### Applications
 
@@ -115,6 +116,10 @@ An absolute `path` is used as-is. Launch method depends on the extension:
 - `.exe` → run directly (honours `args` and `cwd`)
 - `.ps1` → `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path>"`
 - `.bat` / `.cmd` → `cmd.exe /c "<path>"`
+
+Add `"startup": true` to an app to auto-run it once, right after the launcher bar
+appears (its window is centered on screen). Useful to surface your own tools
+immediately.
 
 ### Smart Assistant — BYOK
 
@@ -159,7 +164,8 @@ codebase at your own discretion and at your own risk**; all responsibility and l
 rest with you.
 
 Third-party components are listed in
-[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md). Some optional components of the
+official binary are **not** covered by the MIT License — see [`NOTICE`](NOTICE).
 
 ---
 
@@ -194,7 +200,3 @@ through a **partnership program for MSPs and ISVs** — for example, to ship you
 recovery/support tooling inside a customized boot image.
 
 To learn more, visit **[https://coresystem.vn](https://coresystem.vn)**.
-
----
-
-See also: [`NOTES.md`](NOTES.md) for the detailed development log.

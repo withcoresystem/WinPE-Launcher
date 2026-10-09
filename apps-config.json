@@ -22,6 +22,9 @@
     "headers": {}
   },
 
+  // Apps list. Add "startup": true to any app to auto-run it once after the launcher
+  // loads (its window is centered on screen). Paths are resolved under
+  // [drive]:\CORESYSTEM\Softwares and \Scripts when not absolute.
   "apps": [
     { "name": "Notepad", "path": "notepad.exe" },
     { "name": "Registry Editor", "path": "regedit.exe" },

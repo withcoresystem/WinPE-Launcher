@@ -93,6 +93,7 @@ namespace WinPeLauncher
                 config.SetOk("Refresh");
                 config.SetCancel("Close");
                 config.SetMask(false);
+                config.SetDraggable(false);
                 config.SetLoadingDisableCancel(true);
                 config.SetDefaultAcceptButton(false);
                 config.SetFont(dlgFont);
@@ -113,8 +114,8 @@ namespace WinPeLauncher
                 Application.AddMessageFilter(filter);
                 try
                 {
-                    AntdUI.Config.Animation = false;
-                    DialogDock.Dock(anchor, Accent);
+                    AntdUI.Config.Animation = true;
+                    DialogDock.Dock(anchor, config, Accent);
                     if (cached == null) collect();
                     AntdUI.Modal.open(config);
                 }
@@ -122,6 +123,7 @@ namespace WinPeLauncher
                 {
                     AntdUI.Config.Animation = prevAnim;
                     try { Application.RemoveMessageFilter(filter); } catch { }
+                    DialogDock.Stop();
                     DialogBorder.Hide();
                 }
             }

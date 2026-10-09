@@ -26,7 +26,7 @@ namespace WinPeLauncher
                 AntdUI.Button btnScan = new AntdUI.Button();
                 btnScan.Text = "Scan networks";
                 btnScan.Type = AntdUI.TTypeMini.Primary;
-                btnScan.SetBounds(240, 0, 100, 30);
+                btnScan.SetBounds(224, 0, 116, 32);
                 btnScan.Font = DialogUi.Font;
 
                 ListBox listNets = new ListBox();
@@ -147,11 +147,12 @@ namespace WinPeLauncher
 
                 DialogUi.ScaleBounds(panel, k);
 
-                AntdUI.Modal.Config config = new AntdUI.Modal.Config(new AntdUI.Target(anchor), "Connect to Wi-Fi", (object)panel);
+                AntdUI.Modal.Config config = new AntdUI.Modal.Config(anchor.FindForm(), "Connect to Wi-Fi", (object)panel);
                 config.SetColorScheme(AntdUI.TAMode.Dark);
                 config.SetOk("Connect");
                 config.SetCancel("Cancel");
-                config.SetMask(true);
+                config.SetMask(false);
+                config.SetDraggable(false);
                 config.SetMaskClosable(false);
                 config.SetLoadingDisableCancel(true);
                 config.SetDefaultAcceptButton(true);
@@ -184,7 +185,20 @@ namespace WinPeLauncher
                     return false;
                 };
 
-                DialogResult dr = AntdUI.Modal.open(config);
+                DialogResult dr;
+                bool prevAnim = AntdUI.Config.Animation;
+                try
+                {
+                    AntdUI.Config.Animation = true;
+                    DialogDock.Dock(anchor, config, Accent);
+                    dr = AntdUI.Modal.open(config);
+                }
+                finally
+                {
+                    AntdUI.Config.Animation = prevAnim;
+                    DialogDock.Stop();
+                    DialogBorder.Hide();
+                }
                 if (dr == DialogResult.OK && connectedSsid != null) return connectedSsid;
                 return null;
             }

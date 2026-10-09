@@ -84,6 +84,7 @@ namespace WinPeLauncher
                 config.SetOk("Send");
                 config.SetCancel("Close");
                 config.SetMask(false);
+                config.SetDraggable(false);
                 config.SetLoadingDisableCancel(true);
                 config.SetDefaultAcceptButton(true);
                 config.SetFont(DialogUi.Font);
@@ -131,14 +132,15 @@ namespace WinPeLauncher
                 bool prevAnim = AntdUI.Config.Animation;
                 try
                 {
-                    AntdUI.Config.Animation = false;
-                    DialogDock.Dock(anchor, Accent);
+                    AntdUI.Config.Animation = true;
+                    DialogDock.Dock(anchor, config, Accent);
                     AntdUI.Modal.open(config);
                 }
                 finally
                 {
                     AntdUI.Config.Animation = prevAnim;
                     try { Application.RemoveMessageFilter(wheel); } catch { }
+                    DialogDock.Stop();
                     DialogBorder.Hide();
                 }
             }

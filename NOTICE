@@ -1,0 +1,26 @@
+NOTICE
+======
+
+WinPE Launcher
+Copyright (c) 2026 Tran Trung Truc / CoreSystem
+
+The source code in this repository is released under the MIT License (see LICENSE).
+
+
+Proprietary components (NOT covered by the MIT License)
+-------------------------------------------------------
+
+The EasyDeploy deployment engine ("Deploy-OS.ps1") and the Cloud Deploy feature are
+proprietary components of the EasyDeploy Platform, owned by CoreSystem. They are:
+
+  * NOT part of this repository's source code;
+  * NOT covered by the MIT License;
+  * distributed only as part of the official WinPE Launcher binary.
+
+No part of these components may be extracted, copied, modified, reverse-engineered,
+redistributed, or used to create derivative works without prior written permission
+from CoreSystem. The MIT License above applies solely to the WinPE Launcher source
+code contained in this repository.
+
+
+Third-party components are listed in THIRD-PARTY-NOTICES.md.

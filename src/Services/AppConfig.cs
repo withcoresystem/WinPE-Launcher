@@ -12,6 +12,7 @@ namespace WinPeLauncher.Services
         internal string Cwd;
         internal string Icon;
         internal bool Script;
+        internal bool Startup;
     }
 
     internal class AssistantCfg
@@ -67,6 +68,7 @@ namespace WinPeLauncher.Services
                     entry.Args = Str(o, "args", "arguments", "parameters");
                     entry.Cwd = Str(o, "cwd", "workdir", "workingdir");
                     entry.Icon = Str(o, "icon");
+                    entry.Startup = Bool(o, "startup", "autorun", "autostart");
                     if (string.IsNullOrEmpty(entry.Path)) continue;
                     if (string.IsNullOrEmpty(entry.Name)) entry.Name = Path.GetFileNameWithoutExtension(entry.Path);
                     result.Add(entry);
@@ -182,6 +184,25 @@ namespace WinPeLauncher.Services
             return null;
         }
 
+        // Reads a boolean that may be a JSON bool or a string ("true"/"1"/"yes").
+        private static bool Bool(Dictionary<string, object> o, params string[] keys)
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                object v;
+                if (!o.TryGetValue(keys[i], out v) || v == null) continue;
+                if (v is bool) return (bool)v;
+                if (v is string)
+                {
+                    string s = ((string)v).Trim();
+                    return s.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                           s == "1" ||
+                           s.Equals("yes", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            return false;
+        }
+
         private sealed class Parser
         {
             private readonly string _s;
@@ -201,8 +222,16 @@ namespace WinPeLauncher.Services
                 if (c == '[') return ParseArray();
                 if (c == '"') return ParseString();
                 if (c == '-' || c == '+' || c == '.' || (c >= '0' && c <= '9')) return ParseNumber();
+                if (c == 't' && StartsWith("true")) { _i += 4; return true; }
+                if (c == 'f' && StartsWith("false")) { _i += 5; return false; }
                 SkipToken();
                 return null;
+            }
+
+            private bool StartsWith(string word)
+            {
+                if (_i + word.Length > _s.Length) return false;
+                return string.Compare(_s, _i, word, 0, word.Length, StringComparison.Ordinal) == 0;
             }
 
             private object ParseNumber()

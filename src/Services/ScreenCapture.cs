@@ -19,9 +19,37 @@ namespace WinPeLauncher.Services
         [DllImport("gdi32.dll")]
         private static extern bool BitBlt(IntPtr hdcDest, int xDest, int yDest, int w, int h,
             IntPtr hdcSrc, int xSrc, int ySrc, uint rop);
+        [DllImport("user32.dll")] private static extern bool GetCursorInfo(ref CURSORINFO pci);
+        [DllImport("user32.dll")] private static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO piconinfo);
+        [DllImport("user32.dll")] private static extern bool DrawIconEx(IntPtr hdc, int x, int y,
+            IntPtr hIcon, int cxWidth, int cyWidth, int istepIfAniCur, IntPtr hbrFlickerFreeDraw, int diFlags);
 
         private const uint SRCCOPY = 0x00CC0020;
         private const uint CAPTUREBLT = 0x40000000;
+        private const int CURSOR_SHOWING = 0x00000001;
+        private const int DI_NORMAL = 0x0003;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT { public int X; public int Y; }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct CURSORINFO
+        {
+            public int cbSize;
+            public int flags;
+            public IntPtr hCursor;
+            public POINT ptScreenPos;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ICONINFO
+        {
+            public int fIcon;
+            public int xHotspot;
+            public int yHotspot;
+            public IntPtr hbmMask;
+            public IntPtr hbmColor;
+        }
 
         internal static string CapturePrimary()
         {
@@ -49,6 +77,7 @@ namespace WinPeLauncher.Services
                 Bitmap tmp = Image.FromHbitmap(hBmp);
                 Bitmap copy = new Bitmap(tmp);
                 tmp.Dispose();
+                DrawCursor(copy, r);
                 return copy;
             }
             finally
@@ -58,6 +87,39 @@ namespace WinPeLauncher.Services
                 DeleteDC(memDc);
                 ReleaseDC(IntPtr.Zero, screenDc);
             }
+        }
+
+        // BitBlt does not include the mouse cursor; composite it on top afterwards.
+        private static void DrawCursor(Bitmap bmp, Rectangle screenRect)
+        {
+            try
+            {
+                CURSORINFO ci = new CURSORINFO();
+                ci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
+                if (!GetCursorInfo(ref ci)) return;
+                if (ci.flags != CURSOR_SHOWING || ci.hCursor == IntPtr.Zero) return;
+
+                int x = ci.ptScreenPos.X - screenRect.X;
+                int y = ci.ptScreenPos.Y - screenRect.Y;
+
+                // ptScreenPos is the hotspot; shift so the drawn icon lands correctly.
+                ICONINFO ii;
+                if (GetIconInfo(ci.hCursor, out ii))
+                {
+                    x -= ii.xHotspot;
+                    y -= ii.yHotspot;
+                    if (ii.hbmMask != IntPtr.Zero) DeleteObject(ii.hbmMask);
+                    if (ii.hbmColor != IntPtr.Zero) DeleteObject(ii.hbmColor);
+                }
+
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    IntPtr hdc = g.GetHdc();
+                    try { DrawIconEx(hdc, x, y, ci.hCursor, 0, 0, 0, IntPtr.Zero, DI_NORMAL); }
+                    finally { g.ReleaseHdc(hdc); }
+                }
+            }
+            catch { }
         }
 
         internal static string MediaRoot()

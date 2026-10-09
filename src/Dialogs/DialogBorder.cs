@@ -25,51 +25,56 @@ namespace WinPeLauncher
             if (screenRect.Width <= 0 || screenRect.Height <= 0) return;
             try
             {
-                anchor.BeginInvoke((Action)(() =>
-                {
-                    lock (_lock)
-                    {
-                        try
-                        {
-                            if (_form == null || _form.IsDisposed)
-                            {
-                                DisposeUnlocked();
-                                BorderForm f = new BorderForm();
-                                f.StartPosition = FormStartPosition.Manual;
-                                f.ShowInTaskbar = false;
-                                f.FormBorderStyle = FormBorderStyle.None;
-                                f.BackColor = color;
-                                f.Bounds = screenRect;
-                                f.TopMost = true;
-                                ApplyRegion(f, screenRect);
-                                f.Show();
-                                SetWindowPos(f.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-                                _form = f;
-
-                                _timer = new Timer();
-                                _timer.Interval = 500;
-                                _timer.Tick += (s, e) =>
-                                {
-                                    lock (_lock)
-                                    {
-                                        if (_form != null && !_form.IsDisposed)
-                                            try { SetWindowPos(_form.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE); } catch { }
-                                    }
-                                };
-                                _timer.Start();
-                            }
-                            else if (_form.Bounds != screenRect)
-                            {
-                                _form.Bounds = screenRect;
-                                ApplyRegion(_form, screenRect);
-                                SetWindowPos(_form.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-                            }
-                        }
-                        catch { }
-                    }
-                }));
+                // Run inline when already on the UI thread: queueing via BeginInvoke could
+                // re-create the border after Hide() and leave a stale ring on screen.
+                if (anchor.InvokeRequired) anchor.BeginInvoke((Action)(() => ShowCore(screenRect, color)));
+                else ShowCore(screenRect, color);
             }
             catch { }
+        }
+
+        private static void ShowCore(Rectangle screenRect, Color color)
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    if (_form == null || _form.IsDisposed)
+                    {
+                        DisposeUnlocked();
+                        BorderForm f = new BorderForm();
+                        f.StartPosition = FormStartPosition.Manual;
+                        f.ShowInTaskbar = false;
+                        f.FormBorderStyle = FormBorderStyle.None;
+                        f.BackColor = color;
+                        f.Bounds = screenRect;
+                        f.TopMost = true;
+                        ApplyRegion(f, screenRect);
+                        f.Show();
+                        SetWindowPos(f.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                        _form = f;
+
+                        _timer = new Timer();
+                        _timer.Interval = 500;
+                        _timer.Tick += (s, e) =>
+                        {
+                            lock (_lock)
+                            {
+                                if (_form != null && !_form.IsDisposed)
+                                    try { SetWindowPos(_form.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE); } catch { }
+                            }
+                        };
+                        _timer.Start();
+                    }
+                    else if (_form.Bounds != screenRect)
+                    {
+                        _form.Bounds = screenRect;
+                        ApplyRegion(_form, screenRect);
+                        SetWindowPos(_form.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                    }
+                }
+                catch { }
+            }
         }
 
         internal static void Hide()

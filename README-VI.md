@@ -32,9 +32,10 @@ file exe duy nhất ~4 MB.
 | **Opened Windows** | Liệt kê cửa sổ đang mở (trừ shell), bấm để kích hoạt |
 | **Smart Assistant** | Chat với LLM tương thích OpenAI: render Markdown, chọn/copy text, lịch sử JSONL, giới hạn ≤ 500 từ, sửa lỗi mojibake UTF-8, báo lỗi rõ khi thiếu endpoint/key |
 | **System Diagnostic** | Tổng quan chỉ-đọc qua `Get-CimInstance`: System, CPU, RAM, tình trạng ổ lưu trữ, volume kèm trạng thái BitLocker, GPU, mạng, pin, thiết bị có lỗi |
-| **Screenshot** | Chụp toàn màn hình bằng 1 nút (hoặc phím **PrintScreen**), lưu vào `USB:\Screenshots\IMG-<timestamp>.jpg` |
+| **Screenshot** | Chụp toàn màn hình bằng 1 nút (hoặc phím **PrintScreen**) **kèm con trỏ chuột**, lưu vào `USB:\Screenshots\IMG-<timestamp>.jpg` |
 | **Bar** | Tiêu đề whitebox (≤ 15 ký tự), icon trạng thái mạng (Connected / Disconnected), đồng hồ 2 dòng theo timezone, icon chat / diagnostic / screenshot, chỉnh tỉ lệ UI |
-| **Dialog** | Wi-Fi, BitLocker, thông báo toast (có viền accent) |
+| **Startup apps** | App có `"startup": true` tự chạy một lần sau khi bar tải xong; cửa sổ được canh giữa màn hình |
+| **Dialog** | Wi-Fi, BitLocker, thông báo toast (có viền accent, neo góc phải-dưới, khóa vị trí) |
 
 ---
 
@@ -59,7 +60,7 @@ file exe duy nhất ~4 MB.
 ├── LICENSE                     Giấy phép MIT
 ├── README.md                   README tiếng Anh
 ├── README-VI.md                file này (tiếng Việt)
-├── NOTES.md                    nhật ký phát triển / ghi chú kỹ thuật
+├── NOTICE                      thành phần độc quyền (không thuộc MIT)
 ├── THIRD-PARTY-NOTICES.md      Inter (OFL-1.1), Hack (MIT), AntdUI (Apache-2.0)
 ├── Launcher.csproj             project (win-x64, .NET Framework 4.5, C# 7.3)
 ├── build.cmd                   script build MSBuild
@@ -98,7 +99,7 @@ Triển khai: copy **`Launcher.exe` + `apps-config.json`** vào thư mục bất
 | `timezone` | Timezone áp dụng lúc khởi động (vd `SE Asia Standard Time`) |
 | `uiScale` | Tỉ lệ UI cho launcher và các dialog (1 = 100%). FullHD thường hợp với `1` hoặc `1.25`; 2K/4K có thể cần `1.5`/`2`. Để trống → mặc định `1`. |
 | `assistant` | Cấu hình LLM (BYOK) — xem bên dưới |
-| `apps[]` | Danh sách ứng dụng: `name`, `path`, tùy chọn `args`, `cwd`, `icon` |
+| `apps[]` | Danh sách ứng dụng: `name`, `path`, tùy chọn `args`, `cwd`, `icon`, `startup` |
 
 ### Ứng dụng
 
@@ -113,6 +114,9 @@ Triển khai: copy **`Launcher.exe` + `apps-config.json`** vào thư mục bất
 - `.exe` → chạy trực tiếp (tôn trọng `args` và `cwd`)
 - `.ps1` → `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path>"`
 - `.bat` / `.cmd` → `cmd.exe /c "<path>"`
+
+Thêm `"startup": true` vào một app để nó tự chạy một lần ngay sau khi bar xuất hiện
+(cửa sổ được canh giữa màn hình). Hữu ích để đưa công cụ của bạn lên trước.
 
 ### Smart Assistant — BYOK
 
@@ -157,7 +161,8 @@ nghĩa vụ nào phát sinh từ hoặc liên quan đến phần mềm hay việ
 trách nhiệm**; mọi trách nhiệm và rủi ro thuộc về bạn.
 
 Các thành phần bên thứ ba được liệt kê trong
-[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md). Một số thành phần tùy chọn của
+binary chính thức **không** thuộc giấy phép MIT — xem [`NOTICE`](NOTICE).
 
 ---
 
@@ -191,7 +196,3 @@ script, và PowerShell module của riêng bạn) dành cho **chương trình h�
 — ví dụ để đóng gói bộ công cụ cứu hộ/hỗ trợ của bạn vào một boot image tùy biến.
 
 Tìm hiểu thêm tại **[https://coresystem.vn](https://coresystem.vn)**.
-
----
-
-Xem thêm: [`NOTES.md`](NOTES.md) — nhật ký phát triển chi tiết.

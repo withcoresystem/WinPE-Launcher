@@ -1,18 +1,34 @@
 {
   // Whitebox title on the left side of the bar. Max 15 characters ("..." if longer).
-  "whitebox": "CORESYSTEM VN",
+  "whitebox": "WINPE LAUNCHER",
   "timezone": "SE Asia Standard Time",
 
-  // Smart Assistant: OpenCode Go endpoint (OpenAI-compatible).
+  // UI scale for the launcher and its dialogs (1 = 100%).
+  // FullHD (1920x1080) usually looks best at 1 or 1.25; 2K/4K may need 1.5 or 2.
+  // Leave empty or remove this line to use the default (1).
+  "uiScale": 1,
+
+  // Smart Assistant: cloud LLM connection, OpenAI-compatible endpoint.
+  // endpoint looks like: https://api.example.com/v1  (the engine appends /chat/completions)
+  // Leave apiKey/apiSecret empty until they are issued.
+  // "headers" (optional) adds extra request headers, e.g. OpenCode Go routing:
+  //   "endpoint": "https://opencode.ai/zen/go/v1",
+  //   "headers": { "x-opencode-session": "<any-id>" }
   "assistant": {
-    "endpoint": "https://opencode.ai/zen/go/v1",
+    "endpoint": "",
     "apiKey": "",
     "apiSecret": "",
     "model": "",
-    "headers": { "x-opencode-session": "" }
+    "headers": {}
   },
 
+  // Apps list. Add "startup": true to any app to auto-run it once after the launcher
+  // loads (its window is centered on screen). Paths are resolved under
+  // [drive]:\CORESYSTEM\Softwares and \Scripts when not absolute.
   "apps": [
+    { "name": "Notepad", "path": "notepad.exe" },
+    { "name": "Registry Editor", "path": "regedit.exe" },
+    { "name": "Command Prompt", "path": "cmd.exe" },
     { "name": "Explorer++", "path": "EXPLORER++\\EXPLORER++.EXE" },
     { "name": "HwINFO64", "path": "HWINFO\\HWINFO64.EXE" },
     { "name": "Multidrive", "path": "MULTIDRIVE\\MULTIDRIVE.EXE" },

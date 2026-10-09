@@ -115,6 +115,14 @@ namespace WinPeLauncher
             Invalidate();
         }
 
+        internal void ScrollToBottom()
+        {
+            _offset = MaxOffset;
+            ApplyOffset();
+            if (!_barVisible) _barVisible = true;
+            Invalidate();
+        }
+
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
